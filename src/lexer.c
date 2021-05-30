@@ -15,7 +15,7 @@ static inline char next(Lexer* lexer) {
   return lexer->source[lexer->pos++];
 }
 
-static inline char peek(Lexer* lexer) {
+static inline char peek(const Lexer* lexer) {
   if (!lexer) return '\0';
   return lexer->source[lexer->pos];
 }
