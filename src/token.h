@@ -87,6 +87,7 @@ typedef struct {
 
 typedef struct {
   char* s;
+  size_t length;
 } TokenDataString;
 
 /* Tokens are the fundamental unit of the lexing stage. */
@@ -104,7 +105,7 @@ typedef struct {
 } Token;
 
 Token* token_atom(TokenType type);
-Token* token_string(TokenType type, char* s);
+Token* token_string(TokenType type, char* s, size_t length);
 
 void token_free(Token* token);
 void token_print(const Token* token);

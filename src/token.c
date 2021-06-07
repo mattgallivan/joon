@@ -31,19 +31,18 @@ static Token* token_new(TokenType type) {
 
 Token* token_atom(TokenType type) { return token_new(type); }
 
-Token* token_string(TokenType type, char* s) {
+Token* token_string(TokenType type, char* s, size_t length) {
   if (!s) return NULL;
   Token* token = token_new(type);
   if (!token) return NULL;
   token->data.as_string.s = s;
+  token->data.as_string.length = length;
   return token;
 }
 
 void token_free(Token* token) {
   if (!token) return;
-  if (is_string_type(token->type)) {
-    free(token->data.as_string.s);
-  }
+  if (is_string_type(token->type)) { free(token->data.as_string.s); }
   // TODO: Free integer data
   // TODO: Free float data
   free(token);
@@ -52,8 +51,9 @@ void token_free(Token* token) {
 void token_print(const Token* token) {
   if (!token) return;
   if (is_string_type(token->type)) {
-    printf("(%s: %s, %zu, %zu)\n", token_type_strings[token->type],
-           token->data.as_string.s, token->line_num, token->col_num);
+    printf("(%s(%zu): %s, %zu, %zu)\n", token_type_strings[token->type],
+           token->data.as_string.length, token->data.as_string.s,
+           token->line_num, token->col_num);
   } else {
     printf("(%s, %zu, %zu)\n", token_type_strings[token->type],
            token->line_num, token->col_num);

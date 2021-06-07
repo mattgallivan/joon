@@ -244,14 +244,14 @@ Lexer* lexer_source(const char* source) {
       break;
     case '"': {
       char* str = string(lexer, c);
-      add(lexer, token_string(TOKEN_TYPE_STRING, str));
+      add(lexer, token_string(TOKEN_TYPE_STRING, str, strlen(str)));
       lexer->col_num += strlen(str) + 2 - 1;
       break;
     }
     default:
       if (isalpha(c)) {
         char* id = identifier(lexer, c);
-        add(lexer, token_string(get_id_type(id), id));
+        add(lexer, token_string(get_id_type(id), id, strlen(id)));
         lexer->col_num += strlen(id) - 1;
       } else {
         add(lexer, token_atom(TOKEN_TYPE_UNKNOWN));
