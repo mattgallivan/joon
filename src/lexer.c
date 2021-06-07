@@ -100,13 +100,37 @@ static inline char* string(Lexer* lexer, char c) {
   return string;
 }
 
+Lexer* lexer_file(const char* filepath) {
+  if (!filepath) return NULL;
+  FILE* file = fopen(filepath, "r");
+  if (!file) return NULL;
+
+  // Determine length of source.
+  // NOTE: This won't work on large files because of fseek.
+  if (fseek(file, 0, SEEK_END) == -1) return NULL;
+  long length = ftell(file);
+  if (fseek(file, 0, SEEK_SET) == -1) return NULL;
+
+  // Read the source contents into a string.
+  char* source = malloc(sizeof(*source) * length + 1);
+  if (!source) return NULL;
+  size_t amount = fread(source, sizeof(*source), length, file);
+  if (amount != sizeof(*source) * length) return NULL;
+  source[length] = '\0';
+
+  fclose(file);
+
+  Lexer* lexer = lexer_source(source);
+  return lexer;
+}
+
 Lexer* lexer_source(const char* source) {
   if (!source) return NULL;
 
   // Initialize the lexer.
   Lexer* lexer = malloc(sizeof(*lexer));
   if (!lexer) return NULL;
-  lexer->filename = NULL;
+  lexer->filepath = NULL;
   lexer->source = source;
   lexer->line_num = 0;
   lexer->col_num = 0;
