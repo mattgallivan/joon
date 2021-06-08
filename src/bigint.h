@@ -9,8 +9,14 @@
 #include <stddef.h>
 
 typedef struct {
-  unsigned char* digits;
+  char* digits;
   size_t num_digits, capacity;
 } BigInt;
+
+BigInt* bigint_new(void);
+
+void bigint_free(BigInt* bi);
+
+void bigint_add_digit(BigInt* bi, char digit);
 
 #endif /* BIGINT_H */

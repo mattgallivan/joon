@@ -5,6 +5,8 @@
 
 #include "lexer.h"
 
+#include "bigint.h"
+
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -78,6 +80,21 @@ static inline char* identifier(Lexer* lexer, char c) {
   identifier[length] = '\0';
   previous(lexer);
   return identifier;
+}
+
+static inline BigInt* integer(Lexer* lexer, char c, size_t* num_underscores) {
+  if (!lexer || !num_underscores) return NULL;
+  BigInt* bi = bigint_new();
+  if (!bi) return NULL;
+  *num_underscores = 0;
+  do {
+    if (isdigit(c)) bigint_add_digit(bi, c);
+    else
+      (*num_underscores)++;
+    c = next(lexer);
+  } while (isdigit(c) || c == '_');
+  previous(lexer);
+  return bi;
 }
 
 static inline char* string(Lexer* lexer, char c) {
@@ -192,7 +209,7 @@ Lexer* lexer_source(const char* source) {
       if (peek(lexer) == '>') {
         add(lexer, token_atom(TOKEN_TYPE_ARROW));
         lexer->col_num++;
-	next(lexer);
+        next(lexer);
       } else {
         add(lexer, token_atom(TOKEN_TYPE_DASH));
       }
@@ -253,6 +270,11 @@ Lexer* lexer_source(const char* source) {
         char* id = identifier(lexer, c);
         add(lexer, token_string(get_id_type(id), id, strlen(id)));
         lexer->col_num += strlen(id) - 1;
+      } else if (isdigit(c)) {
+        size_t num_underscores;
+        BigInt* bi = integer(lexer, c, &num_underscores);
+        add(lexer, token_integer(TOKEN_TYPE_INTEGER, bi));
+        lexer->col_num += bi->num_digits + num_underscores - 1;
       } else {
         add(lexer, token_atom(TOKEN_TYPE_UNKNOWN));
       }

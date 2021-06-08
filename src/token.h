@@ -32,6 +32,7 @@
   t(GT, ">") \
   t(HASH, "#") \
   t(ID, "ID") \
+  t(INTEGER, "INTEGER") \
   t(LT, "<") \
   t(PAREN_L, "(") \
   t(PAREN_R, ")") \
@@ -105,6 +106,7 @@ typedef struct {
 } Token;
 
 Token* token_atom(TokenType type);
+Token* token_integer(TokenType type, BigInt* bi);
 Token* token_string(TokenType type, char* s, size_t length);
 
 void token_free(Token* token);
