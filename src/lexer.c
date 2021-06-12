@@ -96,6 +96,21 @@ static inline BigInt* integer(Lexer* lexer, char c) {
   return bi;
 }
 
+static inline BigFloat* floatp(Lexer* lexer, char c) {
+  if (!lexer) return NULL;
+  BigInt* significand = integer(lexer, c);
+  c = next(lexer);
+  if (c != '.') {
+    for (size_t i = 0;
+         i < significand->num_digits + significand->num_underscores; ++i)
+      previous(lexer);
+    return NULL;
+  }
+  BigInt* exponent = integer(lexer, c);
+  BigFloat* bf = bigfloat_new(significand, exponent);
+  return bf;
+}
+
 static inline char* string(Lexer* lexer, char c) {
   if (!lexer) return NULL;
   size_t capacity = 10;
@@ -270,9 +285,18 @@ Lexer* lexer_source(const char* source) {
         add(lexer, token_string(get_id_type(id), id, strlen(id)));
         lexer->col_num += strlen(id) - 1;
       } else if (isdigit(c)) {
-        BigInt* bi = integer(lexer, c);
-        add(lexer, token_integer(TOKEN_TYPE_INTEGER, bi));
-        lexer->col_num += bi->num_digits + bi->num_underscores - 1;
+        BigFloat* bf = floatp(lexer, c);
+        if (bf) {
+          add(lexer, token_float(TOKEN_TYPE_FLOAT, bf));
+          lexer->col_num += bf->significand->num_digits +
+                            bf->significand->num_underscores +
+                            bf->exponent->num_digits +
+                            bf->exponent->num_underscores - 1;
+        } else {
+          BigInt* bi = integer(lexer, c);
+          add(lexer, token_integer(TOKEN_TYPE_INTEGER, bi));
+          lexer->col_num += bi->num_digits + bi->num_underscores - 1;
+        }
       } else {
         add(lexer, token_atom(TOKEN_TYPE_UNKNOWN));
       }

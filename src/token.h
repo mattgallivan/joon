@@ -29,6 +29,7 @@
   t(DASH, "-") \
   t(DOT, ".") \
   t(EQUAL, "=") \
+  t(FLOAT, "FLOAT") \
   t(GT, ">") \
   t(HASH, "#") \
   t(ID, "ID") \
@@ -106,6 +107,7 @@ typedef struct {
 } Token;
 
 Token* token_atom(TokenType type);
+Token* token_float(TokenType type, BigFloat* bf);
 Token* token_integer(TokenType type, BigInt* bi);
 Token* token_string(TokenType type, char* s, size_t length);
 

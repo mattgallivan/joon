@@ -17,6 +17,10 @@ static char* token_type_strings[] = {
 #undef t
 };
 
+static bool is_float_type(TokenType type) {
+  return type == TOKEN_TYPE_FLOAT;
+}
+
 static bool is_integer_type(TokenType type) {
   return type == TOKEN_TYPE_INTEGER;
 }
@@ -35,6 +39,14 @@ static Token* token_new(TokenType type) {
 }
 
 Token* token_atom(TokenType type) { return token_new(type); }
+
+Token* token_float(TokenType type, BigFloat* bf) {
+  if (!bf) return NULL;
+  Token* token = token_new(type);
+  if (!token) return NULL;
+  token->data.as_float.f = bf;
+  return token;
+}
 
 Token* token_integer(TokenType type, BigInt* bi) {
   if (!bi) return NULL;
@@ -57,21 +69,20 @@ void token_free(Token* token) {
   if (!token) return;
   if (is_string_type(token->type)) { free(token->data.as_string.s); }
   if (is_integer_type(token->type)) { bigint_free(token->data.as_int.i); }
-  // TODO: Free float data
+  if (is_float_type(token->type)) { bigfloat_free(token->data.as_float.f); }
   free(token);
 }
 
 void token_print(const Token* token) {
   if (!token) return;
   if (is_integer_type(token->type)) {
-    BigInt* bi = token->data.as_int.i;
-    char* s = malloc(sizeof(*s) * (bi->num_digits + 1));
-    memcpy(s, bi->digits, bi->num_digits);
-    s[bi->num_digits] = '\0';
-    if (!s) return;
-    printf("(%s: %s, %zu, %zu)\n", token_type_strings[token->type], s,
-           token->line_num, token->col_num);
-    free(s);
+    printf("(%s: ", token_type_strings[token->type]);
+    bigint_print(token->data.as_int.i);
+    printf(", %zu, %zu)\n", token->line_num, token->col_num);
+  } else if (is_float_type(token->type)) {
+    printf("(%s: ", token_type_strings[token->type]);
+    bigfloat_print(token->data.as_float.f);
+    printf(", %zu, %zu)\n", token->line_num, token->col_num);
   } else if (is_string_type(token->type)) {
     printf("(%s(%zu): %s, %zu, %zu)\n", token_type_strings[token->type],
            token->data.as_string.length, token->data.as_string.s,

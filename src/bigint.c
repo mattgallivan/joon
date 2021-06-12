@@ -5,7 +5,9 @@
 
 #include "bigint.h"
 
+#include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 BigInt* bigint_new(void) {
   BigInt* bi = malloc(sizeof(*bi));
@@ -39,4 +41,14 @@ void bigint_add_digit(BigInt* bi, char digit) {
     }
     bi->digits = tmp;
   }
+}
+
+void bigint_print(const BigInt* bi) {
+  if (!bi) return;
+  char* s = malloc(sizeof(*s) * (bi->num_digits + 1));
+  memcpy(s, bi->digits, bi->num_digits);
+  s[bi->num_digits] = '\0';
+  if (!s) return;
+  printf("%s", s);
+  free(s);
 }

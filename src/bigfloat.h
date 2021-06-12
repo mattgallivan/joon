@@ -9,8 +9,14 @@
 #include "bigint.h"
 
 typedef struct {
-  BigInt significand;
-  BigInt exponent;
+  BigInt* significand;
+  BigInt* exponent;
 } BigFloat;
+
+BigFloat* bigfloat_new(BigInt* significand, BigInt* exponent);
+
+void bigfloat_free(BigFloat* bf);
+
+void bigfloat_print(const BigFloat* bf);
 
 #endif /* BIGFLOAT_H */

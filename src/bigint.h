@@ -19,5 +19,6 @@ BigInt* bigint_new(void);
 void bigint_free(BigInt* bi);
 
 void bigint_add_digit(BigInt* bi, char digit);
+void bigint_print(const BigInt* bi);
 
 #endif /* BIGINT_H */
