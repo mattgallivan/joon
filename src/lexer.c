@@ -82,15 +82,14 @@ static inline char* identifier(Lexer* lexer, char c) {
   return identifier;
 }
 
-static inline BigInt* integer(Lexer* lexer, char c, size_t* num_underscores) {
-  if (!lexer || !num_underscores) return NULL;
+static inline BigInt* integer(Lexer* lexer, char c) {
+  if (!lexer) return NULL;
   BigInt* bi = bigint_new();
   if (!bi) return NULL;
-  *num_underscores = 0;
   do {
     if (isdigit(c)) bigint_add_digit(bi, c);
     else
-      (*num_underscores)++;
+      bi->num_underscores++;
     c = next(lexer);
   } while (isdigit(c) || c == '_');
   previous(lexer);
@@ -271,10 +270,9 @@ Lexer* lexer_source(const char* source) {
         add(lexer, token_string(get_id_type(id), id, strlen(id)));
         lexer->col_num += strlen(id) - 1;
       } else if (isdigit(c)) {
-        size_t num_underscores;
-        BigInt* bi = integer(lexer, c, &num_underscores);
+        BigInt* bi = integer(lexer, c);
         add(lexer, token_integer(TOKEN_TYPE_INTEGER, bi));
-        lexer->col_num += bi->num_digits + num_underscores - 1;
+        lexer->col_num += bi->num_digits + bi->num_underscores - 1;
       } else {
         add(lexer, token_atom(TOKEN_TYPE_UNKNOWN));
       }

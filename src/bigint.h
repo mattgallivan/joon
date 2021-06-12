@@ -11,6 +11,7 @@
 typedef struct {
   char* digits;
   size_t num_digits, capacity;
+  size_t num_underscores;
 } BigInt;
 
 BigInt* bigint_new(void);

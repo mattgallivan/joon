@@ -12,6 +12,7 @@ BigInt* bigint_new(void) {
   if (!bi) return NULL;
   bi->num_digits = 0;
   bi->capacity = 16;
+  bi->num_underscores = 0;
   bi->digits = malloc(sizeof(*bi->digits) * bi->capacity);
   if (!bi->digits) {
     bigint_free(bi);
