@@ -34,9 +34,10 @@ static void add(Lexer* lexer, Token* token) {
   lexer->tokens[lexer->num_tokens++] = token;
   if (lexer->num_tokens == lexer->capacity) {
     lexer->capacity *= 2;
-    // TODO: Error check on realloc.
-    lexer->tokens =
+    Token** tmp =
         realloc(lexer->tokens, sizeof(*lexer->tokens) * lexer->capacity);
+    if (!tmp) return;
+    lexer->tokens = tmp;
   }
 }
 
@@ -73,8 +74,12 @@ static inline char* identifier(Lexer* lexer, char c) {
     c = next(lexer);
     if (length == capacity) {
       capacity *= 2;
-      // TODO: Error check on realloc.
-      identifier = realloc(identifier, sizeof(*identifier) * capacity);
+      char* tmp = realloc(identifier, sizeof(*identifier) * capacity);
+      if (!tmp) {
+        free(identifier);
+        return NULL;
+      }
+      identifier = tmp;
     }
   } while (isalpha(c) || isdigit(c) || c == '_');
   identifier[length] = '\0';
@@ -123,8 +128,12 @@ static inline char* string(Lexer* lexer, char c) {
     c = next(lexer);
     if (length == capacity) {
       capacity *= 2;
-      // TODO: Error check on realloc.
-      string = realloc(string, sizeof(*string) * capacity);
+      char* tmp = realloc(string, sizeof(*string) * capacity);
+      if (!tmp) {
+        free(string);
+        return NULL;
+      }
+      string = tmp;
     }
   } while (c != '"');
   string[length] = '\0';
@@ -155,7 +164,7 @@ Lexer* lexer_file(const char* filepath) {
   return lexer;
 }
 
-Lexer* lexer_source(const char* source) {
+Lexer* lexer_source(char* source) {
   if (!source) return NULL;
 
   // Initialize the lexer.
@@ -282,16 +291,17 @@ Lexer* lexer_source(const char* source) {
     default:
       if (isalpha(c)) {
         char* id = identifier(lexer, c);
-        add(lexer, token_string(get_id_type(id), id, strlen(id)));
+	TokenType type = get_id_type(id);
+        add(lexer, token_string(type, id, strlen(id)));
         lexer->col_num += strlen(id) - 1;
+        if (type != TOKEN_TYPE_ID) free(id);
       } else if (isdigit(c)) {
         BigFloat* bf = floatp(lexer, c);
         if (bf) {
           add(lexer, token_float(TOKEN_TYPE_FLOAT, bf));
-          lexer->col_num += bf->significand->num_digits +
-                            bf->significand->num_underscores +
-                            bf->exponent->num_digits +
-                            bf->exponent->num_underscores - 1;
+          lexer->col_num +=
+              bf->significand->num_digits + bf->significand->num_underscores +
+              bf->exponent->num_digits + bf->exponent->num_underscores - 1;
         } else {
           BigInt* bi = integer(lexer, c);
           add(lexer, token_integer(TOKEN_TYPE_INTEGER, bi));
@@ -313,6 +323,7 @@ void lexer_free(Lexer* lexer) {
   for (size_t i = 0; i < lexer->num_tokens; ++i) {
     token_free(lexer->tokens[i]);
   }
+  free(lexer->source);
   free(lexer->tokens);
   free(lexer);
 }

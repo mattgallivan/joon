@@ -12,7 +12,7 @@
 
 typedef struct {
   const char* filepath; /* NULL if source not read from file. */
-  const char* source;
+  char* source;
   size_t line_num, col_num;
   size_t pos;
 
@@ -21,7 +21,7 @@ typedef struct {
 } Lexer;
 
 Lexer* lexer_file(const char* filepath);
-Lexer* lexer_source(const char* source);
+Lexer* lexer_source(char* source);
 
 void lexer_free(Lexer* lexer);
 
