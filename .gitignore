@@ -1,0 +1,7 @@
+*.o
+
+.clang-format
+CMakeLists.txt
+
+build/
+examples/
