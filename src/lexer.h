@@ -4,9 +4,14 @@
 #include <stdbool.h>
 
 typedef enum {
-  JN_IDENTIFIER,
   JN_UNKNOWN,
+  JN_IDENTIFIER,
 } JN_TokenType;
+
+static const char *jn_token_type_names[2] = {
+    [JN_UNKNOWN] = "UNKNOWN",
+    [JN_IDENTIFIER] = "ID",
+};
 
 typedef struct {
   JN_TokenType type; // The type of the token.
@@ -36,9 +41,9 @@ bool jn_is_valid_id_start(char c);
  * @brief Convert source code into an array of tokens.
  *
  * @param source The source code to lex.
+ * @param length The length of the source code.
  * @param max_out_tokens The maximum number of tokens provided by out_tokens'
  * memory.
- * @param length The length of the source code.
  * @param out_tokens Memory allocated by the caller to store the lexed tokens.
  * @return The number of tokens lexed.
  */
@@ -52,5 +57,12 @@ int jn_lex(const char *source, int length, int max_out_tokens, JN_Token *out_tok
  * @param out_token Memory allocated by the caller to store the lexed token.
  */
 void jn_lex_id(const char *source, int length, JN_Token *out_token);
+
+/**
+ * @brief Print a token.
+ *
+ * @param token The token to print.
+ */
+void jn_print_token(JN_Token token);
 
 #endif /* LEXER_H */

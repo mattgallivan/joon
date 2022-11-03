@@ -28,6 +28,10 @@ int main(int argc, char *argv[]) {
   int max_num_tokens = (int)length;
   JN_Token *tokens = malloc(sizeof(JN_Token) * max_num_tokens);
   int num_tokens = jn_lex(source, (int)length, max_num_tokens, tokens);
+  printf("Num Tokens: %d\n", num_tokens);
+  for (int i = 0; i < num_tokens; ++i) {
+    jn_print_token(tokens[i]);
+  }
 
   free(tokens);
   free(source);
