@@ -12,13 +12,20 @@ bool jn_is_valid_id_start(char c) {
 
 int jn_lex(const char *source, int length, int max_out_tokens, JN_Token *out_tokens) {
   int num_tokens = 0;
-  int line = 0;
-  int column = -1;
+  int line = 1;
+  int column = 1;
   for (int i = 0; i < length; ++i) {
-    column++;
     JN_Token *token = &out_tokens[num_tokens];
     char c = source[i];
     switch (c) {
+    case '=': {
+      token->type = JN_EQUAL;
+      break;
+    }
+    case ';': {
+      token->type = JN_SEMICOLON;
+      break;
+    }
     case ' ': {
       break;
     }
@@ -30,14 +37,21 @@ int jn_lex(const char *source, int length, int max_out_tokens, JN_Token *out_tok
     default:
       if (jn_is_valid_id_start(c)) {
         jn_lex_id(&source[i], length - i, token);
-        token->line = line;
-        token->column = column;
-        i = i + token->id_length;
-        column = column + token->id_length;
-        num_tokens++;
       }
       break;
     }
+
+    if (token->type != JN_UNKNOWN) {
+      num_tokens++;
+    }
+
+    token->line = line;
+    token->column = column;
+    if (token->type == JN_IDENTIFIER) {
+      i = i + token->id_length;
+      column = column + token->id_length;
+    }
+    column++;
   }
   return num_tokens;
 }

@@ -5,12 +5,16 @@
 
 typedef enum {
   JN_UNKNOWN,
+  JN_EQUAL,
   JN_IDENTIFIER,
+  JN_SEMICOLON,
 } JN_TokenType;
 
-static const char *jn_token_type_names[2] = {
+static const char *jn_token_type_names[4] = {
     [JN_UNKNOWN] = "UNKNOWN",
+    [JN_EQUAL] = "=",
     [JN_IDENTIFIER] = "ID",
+    [JN_SEMICOLON] = ";",
 };
 
 typedef struct {
