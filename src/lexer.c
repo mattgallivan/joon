@@ -10,12 +10,16 @@ bool jn_is_valid_id_start(char c) {
   return isalpha(c) || ((unsigned char)c >= 0xC0);
 }
 
+bool jn_is_valid_number_start(char c) { return c == '-' || isdigit(c); }
+
 int jn_lex(const char *source, int length, int max_out_tokens, JN_Token *out_tokens) {
   int num_tokens = 0;
   int line = 1;
   int column = 1;
   for (int i = 0; i < length; ++i) {
     JN_Token *token = &out_tokens[num_tokens];
+    token->type = JN_UNKNOWN;
+
     char c = source[i];
     switch (c) {
     case '=': {
@@ -37,6 +41,8 @@ int jn_lex(const char *source, int length, int max_out_tokens, JN_Token *out_tok
     default:
       if (jn_is_valid_id_start(c)) {
         jn_lex_id(&source[i], length - i, token);
+      } else if (jn_is_valid_number_start(c)) {
+        jn_lex_number(&source[i], length - i, token);
       }
       break;
     }
@@ -47,9 +53,9 @@ int jn_lex(const char *source, int length, int max_out_tokens, JN_Token *out_tok
 
     token->line = line;
     token->column = column;
-    if (token->type == JN_IDENTIFIER) {
-      i = i + token->id_length;
-      column = column + token->id_length;
+    if (token->type == JN_IDENTIFIER || token->type == JN_INTEGER) {
+      i = i + token->length;
+      column = column + token->length;
     }
     column++;
   }
@@ -57,7 +63,7 @@ int jn_lex(const char *source, int length, int max_out_tokens, JN_Token *out_tok
 }
 
 void jn_lex_id(const char *source, int length, JN_Token *out_token) {
-  out_token->id = source;
+  out_token->characters = source;
   out_token->type = JN_IDENTIFIER;
   int id_length = 1;
   source++;
@@ -69,14 +75,37 @@ void jn_lex_id(const char *source, int length, JN_Token *out_token) {
       break;
     }
   }
-  out_token->id_length = id_length;
+  out_token->length = id_length;
+}
+
+void jn_lex_number(const char *source, int length, JN_Token *out_token) {
+  out_token->characters = source;
+  out_token->type = JN_INTEGER;
+  int integer_length = 1;
+  source++;
+  while (integer_length < length && source) {
+    if (isdigit(*source)) {
+      integer_length++;
+      source++;
+    } else {
+      break;
+    }
+  }
+  out_token->length = integer_length;
+
+  // If we've only parsed a negative sign, this isn't a number.
+  if (out_token->characters[0] == '-' && integer_length == 1) {
+    out_token->type = JN_ERROR;
+  }
 }
 
 void jn_print_token(JN_Token token) {
-  if (token.type == JN_IDENTIFIER) {
-    for (int i = 0; i < token.id_length; ++i) {
-      printf("%c", token.id[i]);
+  if (token.type == JN_IDENTIFIER || token.type == JN_INTEGER || token.type == JN_ERROR) {
+    printf("%s(", jn_token_type_names[token.type]);
+    for (int i = 0; i < token.length; ++i) {
+      printf("%c", token.characters[i]);
     }
+    printf(")");
   } else {
     printf("%s", jn_token_type_names[token.type]);
   }
