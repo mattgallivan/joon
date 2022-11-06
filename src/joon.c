@@ -2,6 +2,7 @@
 #include <stdlib.h>
 
 #include "lexer.h"
+#include "parser.h"
 
 int main(int argc, char *argv[]) {
   FILE *file = fopen("../examples/basic.jn", "r");
@@ -26,13 +27,31 @@ int main(int argc, char *argv[]) {
 
   // Lex the source code.
   int max_num_tokens = (int)length;
-  JN_Token *tokens = malloc(sizeof(JN_Token) * max_num_tokens);
-  int num_tokens = jn_lex(source, (int)length, max_num_tokens, tokens);
+  JN_Token *tokens = malloc(sizeof(*tokens) * max_num_tokens);
+  if (!tokens) {
+    free(source);
+    return 1;
+  }
+  int num_tokens = jn_lex((int)length, source, max_num_tokens, tokens);
   printf("Num Tokens: %d\n", num_tokens);
   for (int i = 0; i < num_tokens; ++i) {
     jn_print_token(tokens[i]);
   }
+  printf("\n");
 
+  // Parse the tokens.
+  int max_num_nodes = max_num_tokens;
+  JN_Node *nodes = malloc(sizeof(*nodes) * max_num_nodes);
+  if (!nodes) {
+    free(tokens);
+    free(source);
+    return 1;
+  }
+  int num_nodes = jn_parse(num_tokens, tokens, max_num_nodes, nodes);
+  printf("Num Nodes: %d\n", num_nodes);
+  jn_print_tree(nodes[0], 0);
+
+  free(nodes);
   free(tokens);
   free(source);
   return 0;

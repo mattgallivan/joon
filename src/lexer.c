@@ -12,22 +12,24 @@ bool jn_is_valid_id_start(char c) {
 
 bool jn_is_valid_number_start(char c) { return c == '-' || isdigit(c); }
 
-int jn_lex(const char *source, int length, int max_out_tokens, JN_Token *out_tokens) {
+int jn_lex(int length, const char *source, int max_out_tokens, JN_Token *out_tokens) {
   int num_tokens = 0;
   int line = 1;
   int column = 1;
-  for (int i = 0; i < length; ++i) {
+
+  // Iterate until length - 1 to save room for END token.
+  for (int i = 0; i < length - 1; ++i) {
     JN_Token *token = &out_tokens[num_tokens];
-    token->type = JN_UNKNOWN;
+    token->type = JN_TT_UNKNOWN;
 
     char c = source[i];
     switch (c) {
     case '=': {
-      token->type = JN_EQUAL;
+      token->type = JN_TT_EQUAL;
       break;
     }
     case ';': {
-      token->type = JN_SEMICOLON;
+      token->type = JN_TT_SEMICOLON;
       break;
     }
     case ' ': {
@@ -35,7 +37,7 @@ int jn_lex(const char *source, int length, int max_out_tokens, JN_Token *out_tok
     }
     case '\n': {
       line++;
-      column = 0;
+      column = 1;
       break;
     }
     default:
@@ -47,24 +49,31 @@ int jn_lex(const char *source, int length, int max_out_tokens, JN_Token *out_tok
       break;
     }
 
-    if (token->type != JN_UNKNOWN) {
+    if (token->type != JN_TT_UNKNOWN) {
       num_tokens++;
     }
 
     token->line = line;
     token->column = column;
-    if (token->type == JN_IDENTIFIER || token->type == JN_INTEGER) {
+    if (token->type == JN_TT_IDENTIFIER || token->type == JN_TT_INTEGER) {
       i = i + token->length;
       column = column + token->length;
     }
     column++;
   }
+
+  out_tokens[num_tokens++] = (JN_Token){
+      .type = JN_TT_END,
+      .line = line,
+      .column = column,
+  };
+
   return num_tokens;
 }
 
 void jn_lex_id(const char *source, int length, JN_Token *out_token) {
   out_token->characters = source;
-  out_token->type = JN_IDENTIFIER;
+  out_token->type = JN_TT_IDENTIFIER;
   int id_length = 1;
   source++;
   while (id_length < length && source) {
@@ -80,7 +89,7 @@ void jn_lex_id(const char *source, int length, JN_Token *out_token) {
 
 void jn_lex_number(const char *source, int length, JN_Token *out_token) {
   out_token->characters = source;
-  out_token->type = JN_INTEGER;
+  out_token->type = JN_TT_INTEGER;
   int integer_length = 1;
   source++;
   while (integer_length < length && source) {
@@ -95,12 +104,12 @@ void jn_lex_number(const char *source, int length, JN_Token *out_token) {
 
   // If we've only parsed a negative sign, this isn't a number.
   if (out_token->characters[0] == '-' && integer_length == 1) {
-    out_token->type = JN_ERROR;
+    out_token->type = JN_TT_ERROR;
   }
 }
 
 void jn_print_token(JN_Token token) {
-  if (token.type == JN_IDENTIFIER || token.type == JN_INTEGER || token.type == JN_ERROR) {
+  if (token.type == JN_TT_IDENTIFIER || token.type == JN_TT_INTEGER || token.type == JN_TT_ERROR) {
     printf("%s(", jn_token_type_names[token.type]);
     for (int i = 0; i < token.length; ++i) {
       printf("%c", token.characters[i]);

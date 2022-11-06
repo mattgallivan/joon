@@ -4,17 +4,18 @@
 #include <stdbool.h>
 
 typedef enum {
-  JN_UNKNOWN,
-  JN_ERROR,
-  JN_EQUAL,
-  JN_IDENTIFIER,
-  JN_INTEGER,
-  JN_SEMICOLON,
+  JN_TT_UNKNOWN,
+  JN_TT_END,
+  JN_TT_ERROR,
+  JN_TT_EQUAL,
+  JN_TT_IDENTIFIER,
+  JN_TT_INTEGER,
+  JN_TT_SEMICOLON,
 } JN_TokenType;
 
-static const char *jn_token_type_names[6] = {
-    [JN_UNKNOWN] = "UNKNOWN", [JN_EQUAL] = "=",     [JN_IDENTIFIER] = "ID",
-    [JN_INTEGER] = "INT",     [JN_SEMICOLON] = ";", [JN_ERROR] = "ERR",
+static const char *jn_token_type_names[7] = {
+    [JN_TT_UNKNOWN] = "UNKNOWN", [JN_TT_END] = "END",     [JN_TT_EQUAL] = "=",   [JN_TT_IDENTIFIER] = "ID",
+    [JN_TT_INTEGER] = "INT",     [JN_TT_SEMICOLON] = ";", [JN_TT_ERROR] = "ERR",
 };
 
 typedef struct {
@@ -52,14 +53,14 @@ bool jn_is_valid_number_start(char c);
 /**
  * @brief Convert source code into an array of tokens.
  *
- * @param source The source code to lex.
  * @param length The length of the source code.
+ * @param source The source code to lex.
  * @param max_out_tokens The maximum number of tokens provided by out_tokens'
  * memory.
  * @param out_tokens Memory allocated by the caller to store the lexed tokens.
  * @return The number of tokens lexed.
  */
-int jn_lex(const char *source, int length, int max_out_tokens, JN_Token *out_tokens);
+int jn_lex(int length, const char *source, int max_out_tokens, JN_Token *out_tokens);
 
 /**
  * @brief Lex an identifier.
