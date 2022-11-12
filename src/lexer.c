@@ -12,17 +12,16 @@ bool jn_is_valid_id_start(char c) {
 
 bool jn_is_valid_number_start(char c) { return c == '-' || isdigit(c); }
 
-int jn_lex(int length, const char *source, int max_out_tokens, JN_Token *out_tokens) {
-  int num_tokens = 0;
+void jn_lex(JN_Lexer *lexer) {
   int line = 1;
   int column = 1;
 
   // Iterate until length - 1 to save room for END token.
-  for (int i = 0; i < length - 1; ++i) {
-    JN_Token *token = &out_tokens[num_tokens];
+  for (int i = 0; i < lexer->length - 1; ++i) {
+    JN_Token *token = &lexer->tokens[lexer->num_tokens];
     token->type = JN_TT_UNKNOWN;
 
-    char c = source[i];
+    char c = lexer->source[i];
     switch (c) {
     case '=': {
       token->type = JN_TT_EQUAL;
@@ -42,15 +41,15 @@ int jn_lex(int length, const char *source, int max_out_tokens, JN_Token *out_tok
     }
     default:
       if (jn_is_valid_id_start(c)) {
-        jn_lex_id(&source[i], length - i, token);
+        jn_lex_id(&lexer->source[i], lexer->length - i, token);
       } else if (jn_is_valid_number_start(c)) {
-        jn_lex_number(&source[i], length - i, token);
+        jn_lex_number(&lexer->source[i], lexer->length - i, token);
       }
       break;
     }
 
     if (token->type != JN_TT_UNKNOWN) {
-      num_tokens++;
+      lexer->num_tokens++;
     }
 
     token->line = line;
@@ -62,13 +61,11 @@ int jn_lex(int length, const char *source, int max_out_tokens, JN_Token *out_tok
     column++;
   }
 
-  out_tokens[num_tokens++] = (JN_Token){
+  lexer->tokens[lexer->num_tokens++] = (JN_Token){
       .type = JN_TT_END,
       .line = line,
       .column = column,
   };
-
-  return num_tokens;
 }
 
 void jn_lex_id(const char *source, int length, JN_Token *out_token) {
@@ -119,4 +116,19 @@ void jn_print_token(JN_Token token) {
     printf("%s", jn_token_type_names[token.type]);
   }
   printf("(%d, %d)\n", token.line, token.column);
+}
+
+void jn_print_lexer(JN_Lexer lexer, bool print_tokens) {
+  printf("-----\n");
+  printf("Lexer\n");
+  printf("-----\n");
+  printf("num_tokens: %d\n", lexer.num_tokens);
+
+  if (!print_tokens)
+    return;
+
+  for (int i = 0; i < lexer.num_tokens; ++i) {
+    jn_print_token(lexer.tokens[i]);
+  }
+  printf("\n");
 }

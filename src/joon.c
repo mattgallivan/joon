@@ -26,35 +26,37 @@ int main(int argc, char *argv[]) {
   fclose(file);
 
   // Lex the source code.
-  int max_num_tokens = (int)length;
-  JN_Token *tokens = malloc(sizeof(*tokens) * max_num_tokens);
-  if (!tokens) {
-    free(source);
-    return 1;
-  }
-  int num_tokens = jn_lex((int)length, source, max_num_tokens, tokens);
-  printf("Num Tokens: %d\n", num_tokens);
-  for (int i = 0; i < num_tokens; ++i) {
-    jn_print_token(tokens[i]);
-  }
-  printf("\n");
+  JN_Lexer lexer = {
+      .source = source,
+      .length = length,
+      .tokens = malloc(sizeof(JN_Token) * (int)length),
+      .num_tokens = 0,
+  };
+  if (!lexer.tokens)
+    goto handle_lexer_error;
+
+  jn_lex(&lexer);
+  jn_print_lexer(lexer, true);
 
   // Parse the tokens.
-  int max_num_nodes = max_num_tokens;
-  JN_Node *nodes = malloc(sizeof(*nodes) * max_num_nodes);
-  if (!nodes) {
-    free(tokens);
-    free(source);
-    return 1;
-  }
-  int num_nodes = jn_parse(num_tokens, tokens, max_num_nodes, nodes);
+  JN_Node *nodes = malloc(sizeof(*nodes) * lexer.num_tokens);
+  if (!nodes)
+    goto handle_parser_error;
+
+  int num_nodes = jn_parse(lexer.num_tokens, lexer.tokens, lexer.num_tokens, nodes);
   printf("Num Nodes: %d\n", num_nodes);
   jn_print_tree(nodes[0], 0);
 
   free(nodes);
-  free(tokens);
+  free(lexer.tokens);
   free(source);
   return 0;
+
+handle_parser_error:
+  free(lexer.tokens);
+
+handle_lexer_error:
+  free(source);
 
 handle_file_error:
   fclose(file);
