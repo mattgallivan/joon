@@ -13,9 +13,12 @@ typedef enum {
   JN_NT_INTEGER,
 } JN_NodeType;
 
-static const char *jn_node_type_names[5] = {
-    [JN_NT_UNKNOWN] = "UNKNOWN",       [JN_NT_ERROR] = "ERR",       [JN_NT_ASSIGNMENT] = "ASSIGNMENT",
-    [JN_NT_IDENTIFIER] = "IDENTIFIER", [JN_NT_INTEGER] = "INTEGER",
+static const char *const jn_node_type_names[5] = {
+  [JN_NT_UNKNOWN] = "UNKNOWN",
+  [JN_NT_ERROR] = "ERR",
+  [JN_NT_ASSIGNMENT] = "ASSIGNMENT",
+  [JN_NT_IDENTIFIER] = "IDENTIFIER",
+  [JN_NT_INTEGER] = "INTEGER",
 };
 
 typedef struct JN_Node JN_Node;

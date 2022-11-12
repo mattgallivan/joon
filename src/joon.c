@@ -27,10 +27,11 @@ int main(int argc, char *argv[]) {
 
   // Lex the source code.
   JN_Lexer lexer = {
-      .source = source,
-      .length = length,
-      .tokens = malloc(sizeof(JN_Token) * (int)length),
-      .num_tokens = 0,
+    .source = source,
+    .length = length + 1, // Add one for the END token
+    .current = 0,
+    .tokens = malloc(sizeof(JN_Token) * (int)(length + 1)),
+    .num_tokens = 0,
   };
   if (!lexer.tokens)
     goto handle_lexer_error;
@@ -39,6 +40,7 @@ int main(int argc, char *argv[]) {
   jn_print_lexer(lexer, true);
 
   // Parse the tokens.
+  /*
   JN_Node *nodes = malloc(sizeof(*nodes) * lexer.num_tokens);
   if (!nodes)
     goto handle_parser_error;
@@ -48,12 +50,15 @@ int main(int argc, char *argv[]) {
   jn_print_tree(nodes[0], 0);
 
   free(nodes);
+  */
   free(lexer.tokens);
   free(source);
   return 0;
 
+  /*
 handle_parser_error:
   free(lexer.tokens);
+  */
 
 handle_lexer_error:
   free(source);
