@@ -26,14 +26,12 @@ void jn_lex(JN_Lexer *lexer) {
       type = JN_TT_SEMICOLON;
       break;
     }
-    case ' ': {
-      break;
-    }
-    case '\n': {
+    case '\n':
       line++;
       column = 0;
-      break;
-    }
+    case ' ':
+    case '\t':
+      goto lex_next;
     default:
       // Identifier
       // NOTE: https://www.cprogramming.com/tutorial/unicode.html
@@ -64,16 +62,15 @@ void jn_lex(JN_Lexer *lexer) {
       }
     }
 
-    if (type != JN_TT_UNKNOWN) {
-      lexer->tokens[lexer->num_tokens++] = (JN_Token){
-        .type = type,
-        .line = line,
-        .column = column,
-        .characters = &lexer->source[lexer->current],
-        .length = length,
-      };
-    }
+    lexer->tokens[lexer->num_tokens++] = (JN_Token){
+      .type = type,
+      .line = line,
+      .column = column,
+      .characters = &lexer->source[lexer->current],
+      .length = length,
+    };
 
+  lex_next:
     lexer->current += length;
     column += length;
   }
@@ -91,16 +88,16 @@ void jn_print_lexer(JN_Lexer lexer, bool print_tokens) {
   printf("+------------+\n");
   printf("| Lexer      |\n");
   printf("+------------+\n");
-  printf(" num_tokens: %d\n", lexer.num_tokens);
+  printf("  num_tokens: %d\n", lexer.num_tokens);
 
   if (!print_tokens)
     return;
 
-  printf("\n");
+  printf("\nTokens:\n");
   for (int i = 0; i < lexer.num_tokens; ++i) {
+    printf("  ");
     jn_print_token(lexer.tokens[i]);
   }
-  printf("\n");
 }
 
 void jn_print_token(JN_Token token) {
