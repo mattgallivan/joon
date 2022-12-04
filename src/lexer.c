@@ -4,13 +4,13 @@
 #include <stdio.h>
 
 void jn_lex(JN_Lexer *lexer) {
-  int line = 1;
-  int column = 1;
+  i64 line = 1;
+  i64 column = 1;
 
   // Iterate until length - 1 to save room for END token.
   while (lexer->current < lexer->length - 1) {
     JN_TokenType type = JN_TT_UNKNOWN;
-    int length = 1;
+    i64 length = 1;
 
     char c = lexer->source[lexer->current];
     switch (c) {
@@ -88,13 +88,13 @@ void jn_print_lexer(JN_Lexer lexer, bool print_tokens) {
   printf("+------------+\n");
   printf("| Lexer      |\n");
   printf("+------------+\n");
-  printf("  num_tokens: %d\n", lexer.num_tokens);
+  printf("  num_tokens: %ld\n", lexer.num_tokens);
 
   if (!print_tokens)
     return;
 
   printf("\nTokens:\n");
-  for (int i = 0; i < lexer.num_tokens; ++i) {
+  for (i64 i = 0; i < lexer.num_tokens; ++i) {
     printf("  ");
     jn_print_token(lexer.tokens[i]);
   }
@@ -103,12 +103,12 @@ void jn_print_lexer(JN_Lexer lexer, bool print_tokens) {
 void jn_print_token(JN_Token token) {
   if (token.type == JN_TT_IDENTIFIER || token.type == JN_TT_INTEGER || token.type == JN_TT_ERROR) {
     printf("%s(", jn_token_type_names[token.type]);
-    for (int i = 0; i < token.length; ++i) {
+    for (i64 i = 0; i < token.length; ++i) {
       printf("%c", token.characters[i]);
     }
-    printf(", %d)", token.length);
+    printf(", %ld)", token.length);
   } else {
     printf("%s\t", jn_token_type_names[token.type]);
   }
-  printf("\t[%d, %d]\n", token.line, token.column);
+  printf("\t[%ld, %ld]\n", token.line, token.column);
 }

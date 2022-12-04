@@ -1,6 +1,7 @@
 #ifndef LEXER_H
 #define LEXER_H
 
+#include "types.h"
 #include <stdbool.h>
 
 typedef enum {
@@ -27,21 +28,22 @@ static const char *const jn_token_type_names[] = {
 
 typedef struct {
   JN_TokenType type;      // The type of the token.
-  int line, column;       // The line and column on which the token begins.
+  i64 line, column;       // The line and column on which the token begins.
   const char *characters; // The beginning of characters stored in the token. Not null terminated!
-  int length;             // The number of characters stored in the token.
+  i64 length;             // The number of characters stored in the token.
 } JN_Token;
 
 typedef struct {
   const char *source; // The source code.
-  int length;         // The length of the source code.
-  int current;        // The index of the character currently being lexed.
+  i64 length;         // The length of the source code.
+  i64 current;        // The index of the character currently being lexed.
   JN_Token *tokens;   // The lexed tokens. This space is provided by the user.
-  int num_tokens;     // The number of lexed tokens.
+  i64 num_tokens;     // The number of lexed tokens.
+  i64 capacity;       // The maximum number of tokens that can be stored.
 } JN_Lexer;
 
 /**
- * @brief Lex source code into tokens.
+ * @brief Lex source code i64o tokens.
  *
  * @param lexer The lexer containing the source code and allocated memory for tokens.
  */

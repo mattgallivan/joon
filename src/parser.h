@@ -3,7 +3,7 @@
 
 #include "lexer.h"
 
-#include <stdint.h>
+#include "types.h"
 
 typedef enum {
   JN_NT_UNKNOWN,
@@ -28,19 +28,33 @@ struct JN_Node {
 
   JN_Node *id_node;
   JN_Node *value_node;
-  int64_t integer;
+  i64 integer;
 };
 
+typedef struct {
+  const JN_Lexer *lexer;
+  JN_Token *token;
+  JN_Node *nodes;
+  i64 num_nodes;
+  i64 capacity;
+} JN_Parser;
+
+void jn_parse(JN_Parser *parser);
+
+void jn_print_parser(JN_Parser parser);
+
+/*
 bool jn_is_token(JN_Token token, JN_TokenType type, const char *characters);
 
-int jn_parse(int num_tokens, JN_Token *tokens, int max_num_nodes, JN_Node *nodes);
+i64 jn_parse(i64 num_tokens, JN_Token *tokens, i64 max_num_nodes, JN_Node *nodes);
 
-int jn_parse_assignment(int num_tokens, JN_Token *tokens, int num_nodes, int max_num_nodes, JN_Node *nodes);
+i64 jn_parse_assignment(i64 num_tokens, JN_Token *tokens, i64 num_nodes, i64 max_num_nodes, JN_Node *nodes);
 
 void jn_print_node(JN_Node node);
 
-void jn_print_tree(JN_Node node, int depth);
+void jn_print_tree(JN_Node node, i64 depth);
 
-int64_t jn_string_to_int64(int length, const char *string);
+i64 jn_string_to_i64(i64 length, const char *string);
+*/
 
 #endif /* PARSER_H */
